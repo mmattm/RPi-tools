@@ -1,14 +1,10 @@
 #!/bin/zsh
 
-# Raspberry Pi user
-PI_USER="ecal"
+# Configuration file
+CONFIG_FILE="config.txt"
 
-# Password for Raspberry Pi
-PI_PASSWORD="ecal"
-
-# Syncplay server IP address and port
-SYNCPLAY_SERVER_IP="10.189.8.122"
-SYNCPLAY_SERVER_PORT="5500"
+# Source the configuration file
+source "$CONFIG_FILE"
 
 # Room name for syncplay
 SYNCPLAY_ROOM="ecal"
@@ -23,23 +19,20 @@ while IFS='=' read -r key value; do
     PI_MAP[$key]=$value
 done < pi_map.txt
 
-Function to check and kill the process using a specific port
-kill_process_on_port() {    
+
+kill_process_on_port() {
     local server_ip=$1
     local port=$2
-    local process_name=$3
-    local command="lsof -i tcp:$port | grep $process_name | awk '{print \$2}' | xargs -r kill"
+    # Find and kill the process using the specified port
+    local command="lsof -t -i tcp:$port | xargs -r kill"
     sshpass -p "$PI_PASSWORD" ssh "$PI_USER@$server_ip" "$command"
 }
 
-# Start Syncplay server on the server
-echo "Checking if Syncplay server is already running on port $SYNCPLAY_SERVER_PORT on $SYNCPLAY_SERVER_IP"
-if sshpass -p "$PI_PASSWORD" ssh "$PI_USER@$SYNCPLAY_SERVER_IP" "lsof -i tcp:$SYNCPLAY_SERVER_PORT | grep syncplay-server"; then
-    echo "Syncplay server is running on $SYNCPLAY_SERVER_PORT. Killing existing process."
-    kill_process_on_port $SYNCPLAY_SERVER_IP $SYNCPLAY_SERVER_PORT syncplay-server
-else
-    echo "Port $SYNCPLAY_SERVER_PORT is free. Starting Syncplay server."
-fi
+# Kill process running on port 5500
+echo "Killing process running on port $SYNCPLAY_SERVER_PORT on $SYNCPLAY_SERVER_IP"
+kill_process_on_port $SYNCPLAY_SERVER_IP $SYNCPLAY_SERVER_PORT
+
+echo "Process on port $SYNCPLAY_SERVER_PORT killed."
 
 echo "Starting Syncplay server on $SYNCPLAY_SERVER_IP"
 sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$SYNCPLAY_SERVER_IP" "nohup syncplay-server --port $SYNCPLAY_SERVER_PORT > /dev/null 2>&1 &"

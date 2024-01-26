@@ -1,14 +1,16 @@
 #!/bin/zsh
 
-# Directory on your Mac containing the videos
-SOURCE_DIR="/Users/matthieu.minguet/Desktop/Samples/Test"
+# Default directory
+DEFAULT_DIR="/Users/matthieu.minguet/Desktop/Samples/Test"
+
+# Use the first command line argument if provided, otherwise use the default directory
+SOURCE_DIR="${1:-$DEFAULT_DIR}"
 
 # Directory on Raspberry Pi where videos will be copied
 DEST_DIR="/home/ecal/Videos"
 
-# Raspberry Pi user and password
-PI_USER="ecal"
-PI_PASSWORD="ecal"
+# Source the configuration file
+source "$CONFIG_FILE"
 
 
 declare -A PI_MAP
