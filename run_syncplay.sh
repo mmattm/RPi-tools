@@ -13,6 +13,13 @@ while IFS='=' read -r key value; do
     PI_MAP[$key]=$value
 done < pi_map.txt
 
+# Function to kill Syncplay process
+kill_mpv() {
+    local pi_ip=$1
+    # Kill the 'mpv' process
+    local command="pkill -x mpv || killall mpv"
+    sshpass -p "$PI_PASSWORD" ssh "$PI_USER@$pi_ip" "$command"
+}
 
 kill_process_on_port() {
     local server_ip=$1
@@ -55,11 +62,21 @@ for pi_id in ${(k)PI_MAP}; do
 
             # Kill existing Syncplay process on the Raspberry Pi
             kill_mpv $pi_ip
+            echo "Syncplay process killed. Starting new Syncplay process on Raspberry Pi at $pi_ip"
 
             # Construct and execute the Syncplay client command via SSH
-            sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "DISPLAY=:0 syncplay --no-gui --player /usr/bin/mpv --room \"$SYNCPLAY_ROOM\" --host \"$SYNCPLAY_SERVER_IP:$SYNCPLAY_SERVER_PORT\" --name \"rp$pi_ip\" \"$video_file\" >/dev/null 2>&1 &"
+            sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "syncplay --no-gui --player '/usr/bin/mpv' --room \"$SYNCPLAY_ROOM\" --host \"$SYNCPLAY_SERVER_IP:$SYNCPLAY_SERVER_PORT\" --name \"rp$pi_ip\"  \"$video_file\" -- --input-ipc-server=/tmp/mpvsocket >/dev/null 2>&1 &"
 
-            echo "\n✅ ––––––––––––––––––––––––––– \n"
+            # check if mpv is running on the Raspberry Pi
+            if sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "pgrep -x mpv >/dev/null 2>&1"; then
+                echo "✅ Syncplay client running on Raspberry Pi at $pi_ip, now playing mpv"
+                sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "echo '{ \"command\": [\"cycle\", \"pause\"] }' | socat - /tmp/mpvsocket"
+            else
+                echo "❌ Syncplay client failed to start on Raspberry Pi at $pi_ip"
+            fi
+
+            # sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "DISPLAY=:0 syncplay --no-gui --player /usr/bin/mpv --room \"$SYNCPLAY_ROOM\" --host \"$SYNCPLAY_SERVER_IP:$SYNCPLAY_SERVER_PORT\" --name \"rp$pi_ip\" \"$video_file\" >/dev/null 2>&1 &"
+
             #sshpass -p "$PI_PASSWORD" ssh "$PI_USER@$pi_ip" "DISPLAY=:0 mpv --no-border --fullscreen  \"$video_file\""
             
           
@@ -78,10 +95,3 @@ done
 
 echo "Syncplay setup completed."
 
-# Function to kill Syncplay process
-kill_mpv() {
-    local pi_ip=$1
-    # Kill the 'mpv' process
-    local command="pkill -x mpv || killall mpv"
-    sshpass -p "$PI_PASSWORD" ssh "$PI_USER@$pi_ip" "$command"
-}
