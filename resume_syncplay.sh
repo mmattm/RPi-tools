@@ -34,7 +34,7 @@ kill_process_on_port() {
 }
 
 # Kill process running on port 5500
-echo "Killing process running on port $SYNCPLAY_SERVER_PORT on $SYNCPLAY_SERVER_IP"
+echo "Killing syncplay server running on port $SYNCPLAY_SERVER_PORT on $SYNCPLAY_SERVER_IP"
 kill_process_on_port $SYNCPLAY_SERVER_IP $SYNCPLAY_SERVER_PORT
 
-echo "Process on port $SYNCPLAY_SERVER_PORT killed."
+echo "Syncplay server on port $SYNCPLAY_SERVER_PORT killed."
