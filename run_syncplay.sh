@@ -66,6 +66,8 @@ for pi_id in ${(k)PI_MAP}; do
 
             # Construct and execute the Syncplay client command via SSH
             sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "syncplay --no-gui --player '/usr/bin/mpv' --room \"$SYNCPLAY_ROOM\" --host \"$SYNCPLAY_SERVER_IP:$SYNCPLAY_SERVER_PORT\" --name \"rp$pi_ip\"  \"$video_file\" -- --input-ipc-server=/tmp/mpvsocket >/dev/null 2>&1 &"
+            
+            sleep 1  # Waits 5 seconds
 
             # check if mpv is running on the Raspberry Pi
             if sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "pgrep -x mpv >/dev/null 2>&1"; then
