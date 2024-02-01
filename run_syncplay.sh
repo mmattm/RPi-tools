@@ -44,7 +44,7 @@ sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$SYNCPLAY_SE
 
 
 # Loop through each Raspberry Pi IP address and run Syncplay client
-for pi_id in ${(k)PI_MAP}; do
+for pi_id in ${(on)${(k)PI_MAP}}; do
     pi_ip=${PI_MAP[$pi_id]}
     video_file="$VIDEO_PATH/$pi_id.mp4"
 
@@ -67,21 +67,21 @@ for pi_id in ${(k)PI_MAP}; do
             # Construct and execute the Syncplay client command via SSH
             sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "syncplay --no-gui --player '/usr/bin/mpv' --room \"$SYNCPLAY_ROOM\" --host \"$SYNCPLAY_SERVER_IP:$SYNCPLAY_SERVER_PORT\" --name \"rp$pi_ip\"  \"$video_file\" -- --input-ipc-server=/tmp/mpvsocket >/dev/null 2>&1 &"
             
-            sleep 1  # Waits 5 seconds
-
+            sleep 2  # Waits 5 seconds
             # check if mpv is running on the Raspberry Pi
             if sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "pgrep -x mpv >/dev/null 2>&1"; then
                 echo "✅ Syncplay client running on Raspberry Pi at $pi_ip, now playing mpv"
-                sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "echo '{ \"command\": [\"cycle\", \"pause\"] }' | socat - /tmp/mpvsocket"
+
+                sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "sudo ydotool click 0"
+
+                if [ "$pi_id" -eq 5 ]; then
+                    sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "echo '{ \"command\": [\"cycle\", \"pause\"] }' | socat - /tmp/mpvsocket"
+                fi
+
             else
                 echo "❌ Syncplay client failed to start on Raspberry Pi at $pi_ip"
             fi
 
-            # sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "DISPLAY=:0 syncplay --no-gui --player /usr/bin/mpv --room \"$SYNCPLAY_ROOM\" --host \"$SYNCPLAY_SERVER_IP:$SYNCPLAY_SERVER_PORT\" --name \"rp$pi_ip\" \"$video_file\" >/dev/null 2>&1 &"
-
-            #sshpass -p "$PI_PASSWORD" ssh "$PI_USER@$pi_ip" "DISPLAY=:0 mpv --no-border --fullscreen  \"$video_file\""
-            
-          
         else
             echo "Video file does not exist on Raspberry Pi at $pi_ip. Skipping..."
             echo "\n❌ ––––––––––––––––––––––––––– \n"

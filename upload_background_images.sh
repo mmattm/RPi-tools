@@ -37,14 +37,14 @@ for file_id in ${(k)PI_MAP}; do
             echo "⤴️ Uploading $image_file to Raspberry Pi ID $file_id at $pi_ip ..."
 
             # Using 'sshpass' to handle password-based authentication
-            sshpass -p "$PI_PASSWORD" scp "$image_file" "$PI_USER@$pi_ip:$PICTURE_PATH/${file_id}.jpg"
+            sshpass -p "$PI_PASSWORD" scp -o StrictHostKeyChecking=no "$image_file" "$PI_USER@$pi_ip:$PICTURE_PATH/${file_id}.jpg"
 
             # Verify the upload
-            if sshpass -p "$PI_PASSWORD" ssh "$PI_USER@$pi_ip" "test -f \"$PICTURE_PATH/${file_id}.jpg\""; then
+            if sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "test -f \"$PICTURE_PATH/${file_id}.jpg\""; then
                 echo "✅ Verification successful: ${file_id}.jpg exists on $pi_ip."
 
                 # Set the image as the desktop background
-                sshpass -p "$PI_PASSWORD" ssh "$PI_USER@$pi_ip" "gsettings set org.gnome.desktop.background picture-uri 'file://$PICTURE_PATH/${file_id}.jpg'"
+                sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "gsettings set org.gnome.desktop.background picture-uri 'file://$PICTURE_PATH/${file_id}.jpg'"
                 echo "🖼️ Desktop background set on $pi_ip."
             else
                 echo "❌ Verification failed: ${file_id}.jpg was not uploaded correctly to $pi_ip."

@@ -38,10 +38,10 @@ for file_id in ${(k)PI_MAP}; do
             echo "⤴️ Uploading $video_file to Raspberry Pi ID $file_id at $pi_ip ..."
 
             # Using 'sshpass' to handle password-based authentication
-            sshpass -p "$PI_PASSWORD" scp "$video_file" "$PI_USER@$pi_ip:$VIDEO_PATH/${file_id}.mp4"
+            sshpass -p "$PI_PASSWORD" scp -o StrictHostKeyChecking=no "$video_file" "$PI_USER@$pi_ip:$VIDEO_PATH/${file_id}.mp4"
 
             # Verify the upload
-            if sshpass -p "$PI_PASSWORD" ssh "$PI_USER@$pi_ip" "test -f \"$VIDEO_PATH/${file_id}.mp4\""; then
+            if sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "test -f \"$VIDEO_PATH/${file_id}.mp4\""; then
                 echo "✅ Verification successful: ${file_id}.mp4 exists on $pi_ip."
             else
                 echo "❌ Verification failed: ${file_id}.mp4 was not uploaded correctly to $pi_ip."
