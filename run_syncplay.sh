@@ -74,7 +74,7 @@ for pi_id in ${(on)${(k)PI_MAP}}; do
 
                 sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "sudo ydotool click 0"
 
-                if [ "$pi_id" -eq 5 ]; then
+                if [ "$pi_id" -eq 1 ]; then
                     sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "echo '{ \"command\": [\"cycle\", \"pause\"] }' | socat - /tmp/mpvsocket"
                 fi
 
