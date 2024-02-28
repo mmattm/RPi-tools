@@ -11,6 +11,8 @@ TARGET_PORT=11000
 # Replace /play/track with the actual OSC address that triggers playing the track in your setup.
 # The integer after i specifies the track number or ID.
 # Adjust these values based on how you've configured OSC in Ableton Live.
-sendosc $TARGET_IP $TARGET_PORT /live/song/start_playing
-osascript -e 'tell application "System Events" to tell process "mpv" to click menu item "Previous File" of menu "Playback" of menu bar 1'
+#osascript -e 'tell application "System Events" to tell process "mpv" to click menu item "Previous File" of menu "Playback" of menu bar 1'
 osascript -e 'tell application "System Events" to tell process "mpv" to click menu item "Toggle Pause" of menu "Playback" of menu bar 1'
+
+
+sendosc $TARGET_IP $TARGET_PORT /live/song/start_playing

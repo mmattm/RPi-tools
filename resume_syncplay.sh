@@ -32,14 +32,6 @@ done
 echo "✅ mpv kill process completed on all Raspberry Pis."
 
 
-# Read Raspberry Pi IP addresses from the TXT file and kill mpv on each
-# while IFS='=' read -r pi_id pi_ip; do
-#     if [[ ! -z "$pi_ip" ]]; then
-#         kill_mpv "$pi_ip"
-#     fi
-# done < "$PI_MAP_FILE"
-
-
 # Function to kill the process using a specific port
 kill_process_on_port() {
     local server_ip=$1

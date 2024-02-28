@@ -6,6 +6,14 @@ CONFIG_FILE="config.txt"
 # Source the configuration file
 source "$CONFIG_FILE"
 
+# Set the VIDEO_FILE to default VIDEO_PATH
+VIDEO_FILE="$VIDEO_PATH"
+
+# Check if an additional subfolder argument is provided
+if [[ -n "$1" ]]; then
+    # Concatenate the additional subfolder to VIDEO_PATH
+    VIDEO_FILE="${VIDEO_FILE}/$1"
+fi
 
 # Assuming the TXT file is named pi_map.txt
 declare -A PI_MAP
@@ -46,7 +54,9 @@ sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$SYNCPLAY_SE
 # Loop through each Raspberry Pi IP address and run Syncplay client
 for pi_id in ${(on)${(k)PI_MAP}}; do
     pi_ip=${PI_MAP[$pi_id]}
-    video_file="$VIDEO_PATH/$pi_id.mp4"
+    #video_file="$VIDEO_PATH/$pi_id.mp4"
+    video_file="$VIDEO_FILE/$pi_id.mp4"
+
 
     echo "\n🤖 ––––––––––––––––––––––––––– \n"
 
@@ -67,7 +77,7 @@ for pi_id in ${(on)${(k)PI_MAP}}; do
             # Construct and execute the Syncplay client command via SSH
             sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "syncplay --no-gui --player '/usr/bin/mpv' --room \"$SYNCPLAY_ROOM\" --host \"$SYNCPLAY_SERVER_IP:$SYNCPLAY_SERVER_PORT\" --name \"rp$pi_ip\"  \"$video_file\" -- --input-ipc-server=/tmp/mpvsocket >/dev/null 2>&1 &"
             
-            sleep 2  # Waits 5 seconds
+            sleep 2  # Waits 2 seconds
             # check if mpv is running on the Raspberry Pi
             if sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "pgrep -x mpv >/dev/null 2>&1"; then
                 echo "✅ Syncplay client running on Raspberry Pi at $pi_ip, now playing mpv"

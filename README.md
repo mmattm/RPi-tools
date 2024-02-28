@@ -20,10 +20,10 @@ $ chmod +x upload_videos.sh
 ### Executer les scripts
 
 ```bash
-$ /run_syncplay.sh
+$ /run_syncplay.sh [folder_path]
 $ /resume_videos.sh
 ```
 
 ```bash
-$ /upload_videos.sh [videos_folder]
+$ /upload_videos.sh [videos_folder] [folder_path]
 ```
