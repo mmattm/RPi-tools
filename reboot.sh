@@ -22,13 +22,35 @@ is_pi_online() {
     return $?
 }
 
+# Function to get the current date and time in a format suitable for the `date` command
+get_current_time() {
+    date +"%Y-%m-%d %H:%M:%S"
+}
+
+current_time=$(get_current_time)
+
+# Function to set the clock of a Raspberry Pi
+set_clock() {
+    local pi_ip=$1
+    echo "Setting clock for Raspberry Pi at $pi_ip to $current_time..."
+    sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "echo '$PI_PASSWORD' | sudo -S date -s '$current_time'"
+}
+
+# Function to disable update-manager notifications on a Raspberry Pi
+disable_update_notifications() {
+    local pi_ip=$1
+    echo "Disabling update-manager notifications for Raspberry Pi at $pi_ip..."
+    sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "dconf write /org/gnome/desktop/notifications/application/update-manager/enable false"
+}
+
 # Function to reboot a Raspberry Pi
 reboot_pi() {
     local pi_ip=$1
     # Check if Raspberry Pi is online
     if is_pi_online "$pi_ip"; then
-        echo "Raspberry Pi at $pi_ip is online. Proceeding with reboot..."
-        local command="sudo reboot"
+        echo "Raspberry Pi at $pi_ip is online. ⏰ Proceeding with clock sync and reboot..."
+        set_clock "$pi_ip"
+         disable_update_notifications "$pi_ip"
         sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "echo '$PI_PASSWORD' | sudo -S reboot"
     else
         echo "😴 Raspberry Pi at $pi_ip is not online. Skipping reboot."

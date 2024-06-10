@@ -27,3 +27,9 @@ $ /resume_videos.sh
 ```bash
 $ /upload_videos.sh [videos_folder] [folder_path]
 ```
+
+### Configurer l'autolaunch
+
+```bash
+$ /autolaunch_setup.sh [--enable|--disable]
+```
