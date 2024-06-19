@@ -1,17 +1,24 @@
 #!/bin/zsh
+
+# Determine the directory where the script is located
+SCRIPT_DIR=$(dirname "$0")
+
 # Configuration file
-CONFIG_FILE="config.txt"
+CONFIG_FILE="$SCRIPT_DIR/config.txt"
 
 # Source the configuration file
 source "$CONFIG_FILE"
 
 # Path to the TXT file with Raspberry Pi IP addresses
-PI_MAP_FILE="pi_map.txt"
+PI_MAP_FILE="$SCRIPT_DIR/pi_map.txt"
 
+# Initialize an associative array for the PI_MAP
 declare -A PI_MAP
+
+# Read the pi_map.txt file and populate the PI_MAP associative array
 while IFS='=' read -r key value; do
     PI_MAP[$key]=$value
-done < pi_map.txt
+done < "$PI_MAP_FILE"
 
 # Function to kill the mpv process
 kill_mpv() {

@@ -1,15 +1,21 @@
 #!/bin/zsh
 
+# Determine the directory where the script is located
+SCRIPT_DIR=$(dirname "$0")
+
 # Configuration file
-CONFIG_FILE="config.txt"
+CONFIG_FILE="$SCRIPT_DIR/config.txt"
 
 # Source the configuration file
 source "$CONFIG_FILE"
 
 # Path to the TXT file with Raspberry Pi IP addresses
-PI_MAP_FILE="pi_map.txt"
+PI_MAP_FILE="$SCRIPT_DIR/pi_map.txt"
 
+# Initialize an associative array for the PI_MAP
 declare -A PI_MAP
+
+# Read the pi_map.txt file and populate the PI_MAP associative array
 while IFS='=' read -r key value; do
     PI_MAP[$key]=$value
 done < "$PI_MAP_FILE"
@@ -50,17 +56,32 @@ reboot_pi() {
     if is_pi_online "$pi_ip"; then
         echo "Raspberry Pi at $pi_ip is online. ⏰ Proceeding with clock sync and reboot..."
         set_clock "$pi_ip"
-         disable_update_notifications "$pi_ip"
+        disable_update_notifications "$pi_ip"
         sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "echo '$PI_PASSWORD' | sudo -S reboot"
     else
         echo "😴 Raspberry Pi at $pi_ip is not online. Skipping reboot."
     fi
 }
 
-for pi_id in ${(on)${(k)PI_MAP}}; do
+# Main script logic
+if [[ -n "$1" ]]; then
+    # If an argument is provided, reboot the specific Raspberry Pi by ID
+    pi_id=$1
     pi_ip=${PI_MAP[$pi_id]}
-    echo "Attempting to reboot Raspberry Pi with IP: $pi_ip"
-    reboot_pi "$pi_ip"
-done
+    if [[ -n "$pi_ip" ]]; then
+        echo "Attempting to reboot Raspberry Pi with ID: $pi_id and IP: $pi_ip"
+        reboot_pi "$pi_ip"
+    else
+        echo "❌ Invalid Raspberry Pi ID: $pi_id"
+    fi
+else
+    # If no argument is provided, reboot all Raspberry Pis
+    for pi_id in ${(on)${(k)PI_MAP}}; do
+        pi_ip=${PI_MAP[$pi_id]}
+        echo "Attempting to reboot Raspberry Pi with IP: $pi_ip"
+        reboot_pi "$pi_ip"
+    done
+fi
 
-echo "✅ Reboot process for all reachable Raspberry Pis initiated."
+echo "✅ Reboot process initiated."
+

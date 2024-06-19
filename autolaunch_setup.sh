@@ -22,6 +22,9 @@ create_and_distribute_script() {
     local autolaunch_script='
     #!/bin/bash
 
+    # activate do not disturb mode
+    gsettings set org.gnome.desktop.notifications show-banners false
+
     # Function to continuously ping the target IP address
     check_connection() {
         successful_pings=0
@@ -68,6 +71,7 @@ create_and_distribute_script() {
     killall syncplay
     killall mpv
     '
+
     # If the IP is the same as SYNCPLAY_SERVER_IP, add the server command
     if [ "$pi_ip" == "$SYNCPLAY_SERVER_IP" ]; then
         autolaunch_script+="
@@ -77,12 +81,23 @@ create_and_distribute_script() {
         "
     fi
 
+    # Check the connection to SYNCPLAY_SERVER_IP if the current IP is not SYNCPLAY_SERVER_IP
+    if [ "$pi_ip" != "$SYNCPLAY_SERVER_IP" ]; then
+        autolaunch_script+="
+    while ! nc -z $SYNCPLAY_SERVER_IP $SYNCPLAY_SERVER_PORT; do
+        echo \"Cannot reach Syncplay server at $SYNCPLAY_SERVER_IP on port $SYNCPLAY_SERVER_PORT. Retrying in 5 seconds...\"
+        sleep 5
+    done
+    echo \"Successfully connected to Syncplay server at $SYNCPLAY_SERVER_IP on port $SYNCPLAY_SERVER_PORT\"
+    "
+    fi
+
     # Add the client command with specific video file
     local video_file="$VIDEO_PATH/$pi_number.mp4"
     autolaunch_script+="
     # Start Syncplay client
-    echo 'Starting video player in 20 seconds...'
-    sleep 20  
+    echo 'Starting video player in 10 seconds...'
+    sleep 10
     # echo 'Starting Syncplay client on Raspberry Pi with IP: $pi_ip'
     nohup syncplay --no-gui --player '/usr/bin/mpv' --room \"$SYNCPLAY_ROOM\" --host \"$SYNCPLAY_SERVER_IP:$SYNCPLAY_SERVER_PORT\" --name \"rp$pi_ip\" \"$video_file\" -- --input-ipc-server=/tmp/mpvsocket >/dev/null 2>&1 &
     "
@@ -93,6 +108,7 @@ create_and_distribute_script() {
     sudo modprobe uinput
     sudo chmod 666 /dev/uinput
     sleep 2  # Waits 2 seconds
+    sudo ydotool mousemove 100 200
     sudo ydotool click 0
     "
 

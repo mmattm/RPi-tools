@@ -1,10 +1,25 @@
 #!/bin/zsh
 
+# Determine the directory where the script is located
+SCRIPT_DIR=$(dirname "$0")
+
 # Configuration file
-CONFIG_FILE="config.txt"
+CONFIG_FILE="$SCRIPT_DIR/config.txt"
 
 # Source the configuration file
 source "$CONFIG_FILE"
+
+# Path to the TXT file with Raspberry Pi IP addresses
+PI_MAP_FILE="$SCRIPT_DIR/pi_map.txt"
+
+# Initialize an associative array for the PI_MAP
+declare -A PI_MAP
+
+# Read the pi_map.txt file and populate the PI_MAP associative array
+while IFS='=' read -r key value; do
+    PI_MAP[$key]=$value
+done < "$PI_MAP_FILE"
+
 
 # Set the VIDEO_FILE to default VIDEO_PATH
 VIDEO_FILE="$VIDEO_PATH"
@@ -15,11 +30,6 @@ if [[ -n "$1" ]]; then
     VIDEO_FILE="${VIDEO_FILE}/$1"
 fi
 
-# Assuming the TXT file is named pi_map.txt
-declare -A PI_MAP
-while IFS='=' read -r key value; do
-    PI_MAP[$key]=$value
-done < pi_map.txt
 
 # Function to kill Syncplay process
 kill_mpv() {
