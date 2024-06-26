@@ -37,9 +37,11 @@ create_and_distribute_script() {
                 fi
             else
                 echo "Ping failed, resetting interface..."
-                sudo ip link set eth0 down
+                #sudo ip link set eth0 down
+                sudo ifconfig eth0 down
                 sleep 5
-                sudo ip link set eth0 up
+                #sudo ip link set eth0 up
+                sudo ifconfig eth0 up
                 sleep 5
                 successful_pings=0
             fi

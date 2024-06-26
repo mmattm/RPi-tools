@@ -86,6 +86,7 @@ get_infos() {
         echo "    $(check_syncplay_server "$pi_ip"),"
         echo "    $(check_cron_schedule "$pi_ip")"
     else
+        echo "    \"offline\": true,"
         echo "    \"clock\": false,"
         echo "    \"syncplay\": false,"
         echo "    \"syncplay-server\": false,"

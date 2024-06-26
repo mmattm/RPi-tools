@@ -1,24 +1,25 @@
-#!/bin/bash
+#!/bin/zsh
+
+# Determine the directory where the script is located
+SCRIPT_DIR=$(dirname "$0")
 
 # Configuration file
-CONFIG_FILE="config.txt"
+CONFIG_FILE="$SCRIPT_DIR/config.txt"
 
 # Source the configuration file
 source "$CONFIG_FILE"
 
 # Path to the TXT file with Raspberry Pi IP addresses
-PI_MAP_FILE="pi_map.txt"
+PI_MAP_FILE="$SCRIPT_DIR/pi_map.txt"
 
-# Function to read the pi_map file into an associative array
-read_pi_map() {
-    while IFS='=' read -r key value; do
-        PI_MAP["$key"]="$value"
-    done < "$PI_MAP_FILE"
-}
+# Initialize an associative array for the PI_MAP
+typeset -A PI_MAP
 
-# Initialize the PI_MAP associative array
-PI_MAP=()
-read_pi_map
+# Read the pi_map.txt file and populate the PI_MAP associative array
+while IFS='=' read -r key value; do
+    PI_MAP[$key]=$value
+done < "$PI_MAP_FILE"
+
 
 # Function to check if Raspberry Pi is online
 is_pi_online() {
@@ -83,7 +84,7 @@ fi
 shutdown_time="$shutdown_minute $shutdown_hour * * *"
 
 # Add or remove cron jobs for each Raspberry Pi
-for pi_id in "${!PI_MAP[@]}"; do
+for pi_id in "${(@k)PI_MAP}"; do
     pi_ip=${PI_MAP[$pi_id]}
     echo "Attempting to configure cron jobs for Raspberry Pi with IP: $pi_ip"
     

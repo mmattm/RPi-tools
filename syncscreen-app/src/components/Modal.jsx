@@ -6,10 +6,31 @@ import TimePicker from "react-time-picker";
 
 import "react-time-picker/dist/TimePicker.css";
 import "react-clock/dist/Clock.css";
+import runScript from "../components/RunScript";
 
 const Modal = ({ isOpen, onClose }) => {
-  const [value, onChange] = useState("");
+  const [time, setTime] = useState("");
+  const [duration, setDuration] = useState("");
+
   if (!isOpen) return null;
+
+  const handleApply = () => {
+    if (!time || !duration) {
+      alert("Please provide both sleep time and duration.");
+      return;
+    }
+
+    const [hour, minute] = time.split(":");
+    const wakeMinutes = parseInt(duration, 10);
+
+    runScript("schedule", {
+      "shutdown-hour": hour,
+      "shutdown-minute": minute,
+      "wake-minutes": wakeMinutes,
+    });
+
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
@@ -24,23 +45,33 @@ const Modal = ({ isOpen, onClose }) => {
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col">
             <label className="mr-3 mb-2">Sleep Time</label>
-            <TimePicker onChange={onChange} value={value} />
+            <TimePicker onChange={setTime} value={time} />
           </div>
           <div className="flex flex-col">
             <label className="mr-3 mb-2">Sleep duration (minutes)</label>
             <input
               className="bg-white border border-black p-1 text-black"
               type="text"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
             />
           </div>
         </div>
         <div className="mt-4 flex gap-2">
-          <button className="bg-black text-white rounded p-2">Apply</button>
+          <button
+            className="bg-black text-white rounded p-2"
+            onClick={handleApply}
+          >
+            Apply
+          </button>
           <button
             className="bg-red-600 text-white rounded p-2"
-            onClick={onClose}
+            onClick={() => {
+              runScript("schedule", { disable: true });
+              onClose();
+            }}
           >
-            Disabled schedule
+            Disable schedule
           </button>
         </div>
       </div>

@@ -16,15 +16,26 @@ app.use(cors());
 
 app.use(express.static(path.join(__dirname, "../dist")));
 
-// Endpoint to run a script by name
 app.get("/api/run-script", (req, res) => {
   const scriptName = req.query.name;
   if (!scriptName) {
     return res.status(400).json({ error: "Script name is required" });
   }
 
-  // Execute the script by name
-  exec(`../${scriptName}.sh`, (error, stdout, stderr) => {
+  const flags = Object.keys(req.query)
+    .filter((key) => key !== "name")
+    .map((key) => {
+      if (req.query[key] === "true" || req.query[key] === "false") {
+        return `--${key}`;
+      } else {
+        return `--${key} ${req.query[key]}`;
+      }
+    })
+    .join(" ");
+
+  // Execute the script with dynamic flags
+  console.log(`../${scriptName}.sh ${flags}`);
+  exec(`../${scriptName}.sh ${flags}`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error executing script: ${error}`);
       return res
@@ -51,7 +62,7 @@ app.get("/api/reboot-device", (req, res) => {
         .status(500)
         .json({ error: "Error executing script", details: stderr });
     }
-    console.log(`Script output: ${stdout}`);
+    //console.log(`Script output: ${stdout}`);
     res.json({ message: "Reboot script executed", output: stdout });
   });
 });
@@ -86,7 +97,7 @@ app.get("/api/get-infos", (req, res) => {
         .status(500)
         .json({ error: "Error executing script", details: stderr });
     }
-    console.log(`Script output: ${stdout}`);
+    //console.log(`Script output: ${stdout}`);
     try {
       const jsonOutput = JSON.parse(stdout);
       res.json({ message: "infos retrieved", output: jsonOutput });

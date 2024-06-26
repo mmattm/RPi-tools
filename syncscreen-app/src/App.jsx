@@ -1,12 +1,10 @@
 import { useRef, useState } from "react";
-import axios from "axios";
 
 import Device from "./components/Device";
 import Clock from "./components/Clock";
 import Modal from "./components/Modal";
+import runScript from "./components/RunScript";
 // import axios from "axios";
-
-export const serverPath = "http://localhost:3000";
 
 const deviceList = [
   { id: 1, ip: "10.0.1.101" },
@@ -32,6 +30,8 @@ const deviceList = [
 
 function App() {
   const deviceRefs = useRef([]);
+  const fileInputRef = useRef(null);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const rebootAllDevices = () => {
@@ -42,14 +42,24 @@ function App() {
     setIsModalOpen(true);
   };
 
-  const runScript = async (scriptName) => {
-    try {
-      const response = await axios.get(
-        `${serverPath}/api/run-script?name=${scriptName}`
+  const handleFileSelect = (event) => {
+    const files = event.target.files;
+    if (files.length > 0) {
+      // Get the relative path of the first file
+      const relativePath = files[0].webkitRelativePath;
+      // Extract the folder path
+      const folderPath = relativePath.substring(
+        0,
+        relativePath.lastIndexOf("/")
       );
-      console.log(response.data);
-    } catch (error) {
-      console.error(`Error running script: ${error.message}`);
+      console.log(folderPath);
+      // runScript("upload_videos", { path: folderPath });
+    }
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
@@ -65,7 +75,7 @@ function App() {
       <div>
         <h2 className="text-3xl my-4">Devices</h2>
 
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-3 lg:grid-cols-4 gap-4">
           {deviceList.map((device, index) => (
             <Device
               key={device.id}
@@ -114,11 +124,18 @@ function App() {
             ⏰ Schedule
           </button>
           <button
-            // onClick={() => runScript("script4")}
+            onClick={triggerFileInput}
             className="w-64 h-24 bg-white border text-xl rounded-lg"
           >
             🚀 Upload videos
           </button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: "none" }}
+            webkitdirectory="true"
+            onChange={handleFileSelect}
+          />
         </div>
       </div>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
