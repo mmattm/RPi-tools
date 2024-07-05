@@ -30,6 +30,34 @@ is_pi_online() {
 }
 
 # Function to add cron jobs
+# add_cron_jobs() {
+#     local pi_ip=$1
+#     local shutdown_time=$2
+#     local wake_minutes=$3
+
+#     echo "Configuring cron jobs for Raspberry Pi at $pi_ip..."
+
+#     # Calculate wake alarm time in seconds
+#     wake_seconds=$((wake_minutes * 60))
+
+#     # Add cron jobs for wake alarm and shutdown
+#     sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" << EOF
+# echo '$PI_PASSWORD' | sudo -S bash -c "(sudo crontab -l 2>/dev/null | grep -v 'echo +.* | sudo tee /sys/class/rtc/rtc0/wakealarm' | grep -v 'sudo halt'; echo '$shutdown_time echo +$wake_seconds | sudo tee /sys/class/rtc/rtc0/wakealarm && sudo halt') | sudo crontab -"
+# EOF
+# }
+
+# # Function to remove cron jobs
+# remove_cron_jobs() {
+#     local pi_ip=$1
+
+#     echo "Removing cron jobs for Raspberry Pi at $pi_ip..."
+
+#     # Remove specific cron jobs related to wake alarm and shutdown
+#     sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" << EOF
+# echo '$PI_PASSWORD' | sudo -S bash -c "(sudo crontab -l | grep -v 'echo +.* | sudo tee /sys/class/rtc/rtc0/wakealarm' | grep -v 'sudo halt') | sudo crontab -"
+# EOF
+# }
+
 add_cron_jobs() {
     local pi_ip=$1
     local shutdown_time=$2
@@ -42,11 +70,11 @@ add_cron_jobs() {
 
     # Add cron jobs for wake alarm and shutdown
     sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" << EOF
-echo '$PI_PASSWORD' | sudo -S bash -c "(sudo crontab -l 2>/dev/null | grep -v 'echo +.* | sudo tee /sys/class/rtc/rtc0/wakealarm' | grep -v 'sudo halt'; echo '$shutdown_time echo +$wake_seconds | sudo tee /sys/class/rtc/rtc0/wakealarm && sudo halt') | sudo crontab -"
+echo '$PI_PASSWORD' | sudo -S bash -c "(sudo crontab -l 2>/dev/null | grep -v 'echo 0 | sudo tee /sys/class/rtc/rtc0/wakealarm' | grep -v 'echo +.* | sudo tee /sys/class/rtc/rtc0/wakealarm' | grep -v 'sudo halt'; echo '$shutdown_time echo 0 | sudo tee /sys/class/rtc/rtc0/wakealarm && echo +$wake_seconds | sudo tee /sys/class/rtc/rtc0/wakealarm && sudo halt') | sudo crontab -"
 EOF
 }
 
-# Function to remove cron jobs
+
 remove_cron_jobs() {
     local pi_ip=$1
 
@@ -54,9 +82,10 @@ remove_cron_jobs() {
 
     # Remove specific cron jobs related to wake alarm and shutdown
     sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" << EOF
-echo '$PI_PASSWORD' | sudo -S bash -c "(sudo crontab -l | grep -v 'echo +.* | sudo tee /sys/class/rtc/rtc0/wakealarm' | grep -v 'sudo halt') | sudo crontab -"
+echo '$PI_PASSWORD' | sudo -S bash -c "(sudo crontab -l | grep -v 'echo 0 | sudo tee /sys/class/rtc/rtc0/wakealarm' | grep -v 'echo +.* | sudo tee /sys/class/rtc/rtc0/wakealarm' | grep -v 'sudo halt') | sudo crontab -"
 EOF
 }
+
 
 # Parse command-line arguments
 disable_flag=0

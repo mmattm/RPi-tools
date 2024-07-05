@@ -18,6 +18,7 @@ app.use(express.static(path.join(__dirname, "../dist")));
 
 app.get("/api/run-script", (req, res) => {
   const scriptName = req.query.name;
+  console.log(`GET /api/run-script?name=${scriptName}`);
   if (!scriptName) {
     return res.status(400).json({ error: "Script name is required" });
   }

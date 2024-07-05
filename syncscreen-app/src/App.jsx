@@ -30,7 +30,7 @@ const deviceList = [
 
 function App() {
   const deviceRefs = useRef([]);
-  const fileInputRef = useRef(null);
+  // const fileInputRef = useRef(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -42,26 +42,26 @@ function App() {
     setIsModalOpen(true);
   };
 
-  const handleFileSelect = (event) => {
-    const files = event.target.files;
-    if (files.length > 0) {
-      // Get the relative path of the first file
-      const relativePath = files[0].webkitRelativePath;
-      // Extract the folder path
-      const folderPath = relativePath.substring(
-        0,
-        relativePath.lastIndexOf("/")
-      );
-      console.log(folderPath);
-      // runScript("upload_videos", { path: folderPath });
-    }
-  };
+  // const handleFileSelect = (event) => {
+  //   const files = event.target.files;
+  //   if (files.length > 0) {
+  //     // Get the relative path of the first file
+  //     const relativePath = files[0].webkitRelativePath;
+  //     // Extract the folder path
+  //     const folderPath = relativePath.substring(
+  //       0,
+  //       relativePath.lastIndexOf("/")
+  //     );
+  //     console.log(folderPath);
+  //     // runScript("upload_videos", { path: folderPath });
+  //   }
+  // };
 
-  const triggerFileInput = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
+  // const triggerFileInput = () => {
+  //   if (fileInputRef.current) {
+  //     fileInputRef.current.click();
+  //   }
+  // };
 
   return (
     <div className="bg-gray-100 p-4">
@@ -87,13 +87,13 @@ function App() {
         </div>
       </div>
       <div className="w-full flex flex-col my-4">
-        <h2 className="text-3xl my-4">Controls</h2>
+        <h2 className="text-3xl my-4">Controls All</h2>
         <div className="flex gap-4">
           <button
             onClick={rebootAllDevices}
             className="w-64 h-24 bg-white border text-xl rounded-lg"
           >
-            🔄 Reboot and reset clock (All)
+            🔄 Reboot all and reset clocks
           </button>
 
           <button
@@ -124,6 +124,13 @@ function App() {
             ⏰ Schedule
           </button>
           <button
+            // onClick={() => runScript("script3")}
+            onClick={() => runScript("power_off")}
+            className="w-64 h-24 bg-white border text-xl rounded-lg"
+          >
+            😴 Power Off
+          </button>
+          {/* <button
             onClick={triggerFileInput}
             className="w-64 h-24 bg-white border text-xl rounded-lg"
           >
@@ -135,7 +142,7 @@ function App() {
             style={{ display: "none" }}
             webkitdirectory="true"
             onChange={handleFileSelect}
-          />
+          /> */}
         </div>
       </div>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>

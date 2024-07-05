@@ -4,6 +4,7 @@ import axios from "axios";
 export const serverPath = "http://localhost:3000";
 
 const runScript = async (scriptName, flags = {}) => {
+  console.log(`Running script: ${scriptName}`);
   try {
     const params = { name: scriptName, ...flags };
 

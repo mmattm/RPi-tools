@@ -53,26 +53,49 @@ check_syncplay_server() {
     fi
 }
 
-# Function to check if a cron schedule is active and get the hours
 check_cron_schedule() {
     local pi_ip=$1
-    local cron_job=$(sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "sudo crontab -l | grep 'sudo tee /sys/class/rtc/rtc0/wakealarm'")
+    local cron_job=$(sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "sudo crontab -l | grep 'echo 0 | sudo tee /sys/class/rtc/rtc0/wakealarm && echo +.* | sudo tee /sys/class/rtc/rtc0/wakealarm && sudo halt'")
     if [[ -n "$cron_job" ]]; then
-        # Remove everything after the first '|' character
-        cron_job=${cron_job%%|*}
+        # Extract the cron time
         local cron_hour=$(echo "$cron_job" | awk '{print $2}')
         local cron_minute=$(echo "$cron_job" | awk '{print $1}')
-        local sleep_time=$(echo "$cron_job" | awk '{print $7}' | cut -d'+' -f2)
+        # Extract the sleep time using awk
+        local sleep_time=$(echo "$cron_job" | awk -F 'echo \\+' '{print $2}' | awk -F ' ' '{print $1}')
+
         if [[ -n "$sleep_time" && "$sleep_time" =~ ^[0-9]+$ ]]; then
             local sleep_minutes=$((sleep_time / 60))
-            echo "\"cron\": {\"hour\": \"$cron_hour\", \"minute\": \"$cron_minute\", \"sleep_minutes\": \"$sleep_minutes\"}"
+            echo "\"cron\": {\"active\": true, \"hour\": \"$cron_hour\", \"minute\": \"$cron_minute\", \"sleep_minutes\": \"$sleep_minutes\"}"
         else
-            echo "\"cron\": {\"active\": true, \"hour\": \"$cron_hour\", \"minute\": \"$cron_minute\", \"sleep_minutes\": \"$sleep_time\}"
+            echo "\"cron\": {\"active\": true, \"hour\": \"$cron_hour\", \"minute\": \"$cron_minute\", \"sleep_minutes\": \"$sleep_time\"}"
         fi
     else
         echo "\"cron\": false"
     fi
 }
+
+
+
+# # Function to check if a cron schedule is active and get the hours
+# check_cron_schedule() {
+#     local pi_ip=$1
+#     local cron_job=$(sshpass -p "$PI_PASSWORD" ssh -o StrictHostKeyChecking=no "$PI_USER@$pi_ip" "sudo crontab -l | grep 'sudo tee /sys/class/rtc/rtc0/wakealarm'")
+#     if [[ -n "$cron_job" ]]; then
+#         # Remove everything after the first '|' character
+#         cron_job=${cron_job%%|*}
+#         local cron_hour=$(echo "$cron_job" | awk '{print $2}')
+#         local cron_minute=$(echo "$cron_job" | awk '{print $1}')
+#         local sleep_time=$(echo "$cron_job" | awk '{print $7}' | cut -d'+' -f2)
+#         if [[ -n "$sleep_time" && "$sleep_time" =~ ^[0-9]+$ ]]; then
+#             local sleep_minutes=$((sleep_time / 60))
+#             echo "\"cron\": {\"hour\": \"$cron_hour\", \"minute\": \"$cron_minute\", \"sleep_minutes\": \"$sleep_minutes\"}"
+#         else
+#             echo "\"cron\": {\"active\": true, \"hour\": \"$cron_hour\", \"minute\": \"$cron_minute\", \"sleep_minutes\": \"$sleep_time\}"
+#         fi
+#     else
+#         echo "\"cron\": false"
+#     fi
+# }
 
 
 
