@@ -9,7 +9,8 @@ fi
 
 
 # Start the Node.js application
-/opt/homebrew/bin/node /Users/expo/Desktop/RPi-tools/syncscreen-app/backend/index.js &
+#/opt/homebrew/bin/node /Users/expo/Desktop/RPi-tools/syncscreen-app/backend/index.js &
+/opt/homebrew/bin/node /Users/matthieu.minguet/Code/ECAL/Workshops/JOVaud/syncscreen-app/backend/index.js &
 
 sleep 2
 

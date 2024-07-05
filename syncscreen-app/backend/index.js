@@ -16,6 +16,9 @@ app.use(cors());
 
 app.use(express.static(path.join(__dirname, "../dist")));
 
+// Define the absolute path to your scripts
+const scriptsPath = path.join(__dirname, "../../");
+
 app.get("/api/run-script", (req, res) => {
   const scriptName = req.query.name;
   console.log(`GET /api/run-script?name=${scriptName}`);
@@ -34,9 +37,10 @@ app.get("/api/run-script", (req, res) => {
     })
     .join(" ");
 
-  // Execute the script with dynamic flags
-  console.log(`../${scriptName}.sh ${flags}`);
-  exec(`../${scriptName}.sh ${flags}`, (error, stdout, stderr) => {
+  // Execute the script with dynamic flags using absolute path
+  const scriptPath = path.join(scriptsPath, `${scriptName}.sh`);
+  console.log(`${scriptPath} ${flags}`);
+  exec(`${scriptPath} ${flags}`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error executing script: ${error}`);
       return res
@@ -54,23 +58,21 @@ app.get("/api/reboot-device", (req, res) => {
     return res.status(400).json({ error: "ID is required" });
   }
 
-  // Execute the reboot.sh script with the specific ID
-
-  exec(`../reboot.sh ${piId}`, (error, stdout, stderr) => {
+  // Execute the reboot.sh script with the specific ID using absolute path
+  const scriptPath = path.join(scriptsPath, "reboot.sh");
+  exec(`${scriptPath} ${piId}`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error executing script: ${error}`);
       return res
         .status(500)
         .json({ error: "Error executing script", details: stderr });
     }
-    //console.log(`Script output: ${stdout}`);
     res.json({ message: "Reboot script executed", output: stdout });
   });
 });
 
 // Endpoint to ping a specific device by IP address
 app.get("/api/ping-device", async (req, res) => {
-  //console.log("GET /api/ping-device");
   const ip = req.query.ip;
   if (!ip) {
     return res.status(400).json({ error: "IP address is required" });
@@ -91,14 +93,15 @@ app.get("/api/get-infos", (req, res) => {
     return res.status(400).json({ error: "ID is required" });
   }
 
-  exec(`../get_infos.sh ${piId}`, (error, stdout, stderr) => {
+  // Execute the get_infos.sh script with the specific ID using absolute path
+  const scriptPath = path.join(scriptsPath, "get_infos.sh");
+  exec(`${scriptPath} ${piId}`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error executing script: ${error}`);
       return res
         .status(500)
         .json({ error: "Error executing script", details: stderr });
     }
-    //console.log(`Script output: ${stdout}`);
     try {
       const jsonOutput = JSON.parse(stdout);
       res.json({ message: "infos retrieved", output: jsonOutput });
