@@ -10,6 +10,8 @@ fi
 sleep 2
 
 # Open a new terminal window and start the Node.js application
+# CHange with 
+# /Users/expo/Desktop/RPi-tools/syncscreen-app/backend/index.js
 osascript <<EOF
 tell application "Terminal"
     do script "/opt/homebrew/bin/node /Users/matthieu.minguet/Code/ECAL/Workshops/JOVaud/syncscreen-app/backend/index.js"
